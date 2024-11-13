@@ -1,7 +1,9 @@
 from tkinter import *                                       # Importing Tkinter
 import tkinter.messagebox                                   # Importing Messsagebox function
+from traceback import format_exc
+
 from PIL import ImageTk, Image                              # Importing Image & Pillow for image manipulation
-from scipy.constants import centi
+from scipy.ndimage import label
 
 
 def Spotify():                                              # Defining Spotify function
@@ -396,26 +398,50 @@ def loginLayout():
 
 
 def signupLayout():
-    loginPage  = Tk()                                               # Creating a root layout
-    loginPage.title("Login")                                        # Giving title to the root layout
-    login_width = 500                                               # Setting width
-    login_height = 800                                              # Setting height
-    screen_width = loginPage.winfo_screenwidth()                    # Get screen width
-    screen_height = loginPage.winfo_screenheight()                  # Get screen height
-    x = (screen_width/2) - (login_width/2)                          # Get x
-    y = (screen_height/2) - (login_height/2)                        # Get y
-    loginPage.geometry("%dx%d+%d+%d" % (login_width, login_height, x, y))  # Setting geometry
-    loginPage.overrideredirect(True)                                # Showing windows borders Initially
-    loginPage.config(bg= "#000000")                                 # Setting background color
-    loginPage.resizable(False, False)                    # Disable resizing
-    loginPage.attributes('-alpha', 1.0)                             # Setting transparency
+    signupPage  = tkinter.Toplevel()                                         # Creating a root layout
+    signupPage.title("Login")                                        # Giving title to the root layout
+    signup_width = 500                                                # Setting width
+    signup_height = 800                                               # Setting height
+    screen_width = signupPage.winfo_screenwidth()                    # Get screen width
+    screen_height = signupPage.winfo_screenheight()                  # Get screen height
+    x = (screen_width/2) - (signup_width/2)                           # Get x
+    y = (screen_height/2) - (signup_height/2)                         # Get y
+    signupPage.geometry("%dx%d+%d+%d" % (signup_width, signup_height, x, y))  # Setting geometry
+    signupPage.overrideredirect(True)                                # Showing windows borders Initially
+    signupPage.config(bg= "#000000")                                 # Setting background color
+    signupPage.resizable(False, False)                   # Disable resizing
+    signupPage.attributes('-alpha', 1.0)                             # Setting transparency
 
+    whiteLogo = Image.open("images/spotify_white.png")               # Opening spotify logo
+    resizedWhite = whiteLogo.resize((50, 50))                        # Resizing spotify logo
+    whiteLogo = ImageTk.PhotoImage(resizedWhite)                     # Assigning Image to object
 
+    spotifyWhite = Label(signupPage,                                 # Correctly using signupPage as parent
+                         image=whiteLogo,                            # Assigning image
+                         bg="#000000")                               # Setting background color
+    spotifyWhite.image = whiteLogo                                   # Prevent garbage collection
+    spotifyWhite.pack(side=LEFT, anchor=N, padx=220, pady=50)        # Placing the label
 
+    listenLabel = Label(signupPage,                                  # Correctly using signupPage as parent
+                        text="Sign up to",                           # Setting text
+                        font=("CircularStd", 35, "bold"),            # Setting font
+                        foreground="#ffffff",                        # Setting foreground color
+                        bg="#000000")                                # Setting background color
+    listenLabel.place(x=signup_width // 4, y=signup_height // 6)     # Placing the label
 
+    listenLabel2 = Label(signupPage,                                 # Correctly using signupPage as parent
+                         text="Start Listening",                     # Setting text
+                         font=("CircularStd", 35, "bold"),           # Setting font
+                         foreground="#ffffff",                       # Setting foreground color
+                         bg="#000000")                               # Setting background color
+    listenLabel2.place(x=signup_width // 7, y=signup_height // 4)    # Placing the label
 
+    EmailLabel = Label(signupPage,                                   # Correctly using signupPage as parent
+                       text="Email address",                         # Setting text
+                       font=("CircularStd", 10, "bold"),             # Setting font
+                       foreground="#ffffff",                         # Setting foreground color
+                       bg="#000000")                                 # Setting background color
+    EmailLabel.place(x=signup_width // 7, y=signup_height // 2.5)      # Placing the label
 
-
-
-Spotify()                                                   # Calling Spotify function
-mainloop()                                                  # Running mainloop
+Spotify()                                                            # Calling Spotify function
+mainloop()                                                           # Running mainloop
