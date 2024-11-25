@@ -1,9 +1,22 @@
+from operator import iconcat
 from tkinter import *                                       # Importing Tkinter
 import tkinter.messagebox                                   # Importing Messsagebox function
-from traceback import format_exc
-
 from PIL import ImageTk, Image                              # Importing Image & Pillow for image manipulation
-from scipy.ndimage import label
+import sqlite3                                              # Importing Sqlite3
+
+# ------------------------------ Creating Database ------------------------------ #
+connection = sqlite3.connect("Spotify.db")                  # Creating a database
+cur        = connection.cursor()                            # Creating a cursor
+cur.execute(''' CREATE TABLE IF NOT EXISTS users(
+                UserID      INTEGER PRIMARY KEY AUTOINCREMENT,
+                Email       TEXT UNIQUE,
+                Name        TEXT UNIQUE,
+                Password    TEXT)
+            ''')
+# write changes to the database
+connection.commit()
+
+
 
 
 def Spotify():                                              # Defining Spotify function
@@ -392,16 +405,16 @@ def loginLayout():
     loginPage.geometry("%dx%d+%d+%d" % (login_width, login_height, x, y))  # Setting geometry
     loginPage.overrideredirect(True)                                # Showing windows borders Initially
     loginPage.config(bg= "#000000")                                 # Setting background color
-    loginPage.resizable(False, False)                    # Disable resizing
+    loginPage.resizable(False, False)                   # Disable resizing
     loginPage.attributes('-alpha', 1.0)                             # Setting transparency
 
 
 
 def signupLayout():
-    signupPage  = tkinter.Toplevel()                                         # Creating a root layout
+    signupPage  = tkinter.Toplevel()                                 # Creating a root layout
     signupPage.title("Login")                                        # Giving title to the root layout
-    signup_width = 500                                                # Setting width
-    signup_height = 800                                               # Setting height
+    signup_width = 500                                               # Setting width
+    signup_height = 800                                              # Setting height
     screen_width = signupPage.winfo_screenwidth()                    # Get screen width
     screen_height = signupPage.winfo_screenheight()                  # Get screen height
     x = (screen_width/2) - (signup_width/2)                           # Get x
@@ -411,6 +424,117 @@ def signupLayout():
     signupPage.config(bg= "#000000")                                 # Setting background color
     signupPage.resizable(False, False)                   # Disable resizing
     signupPage.attributes('-alpha', 1.0)                             # Setting transparency
+
+    # ------------------------ All Forms Function ------------------ #
+    def EmailEntry_Focus(*arg):                                      # Defining EmailEntry_Focus function
+        if EmailTextField.get() == "name@domain.com":                # Checking if EmailTextField is empty
+            EmailTextField.delete(0, "end")                  # Deleting text
+            EmailTextField.config(foreground="white")                # Setting foreground color
+        else:
+            pass
+
+    def EmailEntry_Leave(*arg):                                      # Defining EmailEntry_Leave function
+        if len(EmailTextField.get()) == 0:                           # Checking if EmailTextField is empty
+            EmailTextField.insert(0, "name@domain.com")   # Inserting text
+            EmailTextField.focus()                                   # Focusing on EmailTextField
+            EmailTextField.config(foreground="#999999")              # Setting foreground color
+
+    def NameEntry_Focus(*arg):                                       # Defining NameEntry_Focus function
+        if NameTextField.get() == "John Doe":                        # Checking if NameTextField is empty
+            NameTextField.delete(0, "end")                   # Deleting text
+            NameTextField.config(foreground="white")                 # Setting foreground color
+        else:
+            pass
+
+    def NameEntry_Leave(*arg):                                       # Defining NameEntry_Leave function
+        if len(NameTextField.get()) == 0:                            # Checking if NameTextField is empty
+            NameTextField.insert(0, "John Doe")           # Inserting text
+            NameTextField.focus()                                    # Focusing on NameTextField
+            NameTextField.config(foreground="#999999")               # Setting foreground color
+
+    def PasswordEntry_Focus(*arg):                                   # Defining PasswordEntry_Focus function
+        if PasswordTextField.get() == "Password":               # Checking if PasswordTextField is empty
+            PasswordTextField.config(show="*")                       # Mashing Password
+            PasswordTextField.delete(0, "end")               # Erasing all text in PasswordTextField
+            PasswordTextField.config(foreground="white")             # Setting foreground color
+            EyeImage.place(x=signup_width // 1.35, y=signup_height // 1.67)
+
+        else:
+            pass
+    def PasswordEntry_Leave(*arg):                                   # Defining PasswordEntry_Leave function
+        if len(PasswordTextField.get()) == 0:                        # Checking if PasswordTextField is empty
+            PasswordTextField.config(show="")                        # Unmashing Password
+            PasswordTextField.insert(0, "Password")       # Inserting text
+            PasswordTextField.focus()                                # Focusing on PasswordTextField
+            PasswordTextField.config(foreground="#999999")           # Setting foreground color
+            EyeImage.place(x=10000, y=10000)
+
+
+    def show_hide_Password():                                        # Defining show_hide_Password function
+        if PasswordTextField["show"] == "*":                         # Checking if PasswordTextField is mashed
+            PasswordTextField.config(show="")                        # Unmashing Password
+            EyeImage.config(image=NewHideEye)                        # Changing eye image
+            EyeImage.image = NewHideEye                              # Prevent garbage collection
+        else:
+            PasswordTextField.config(show="*")                       # Mashing Password
+            EyeImage.config(image=NewShowEye)                        # Changing eye image
+            EyeImage.image = NewShowEye                              # Prevent garbage collection
+
+
+    # ------------------------------------- Signup Function -------------------------------------- #
+    def signupFunction():                                            # Creating a signup function
+        check_counter = 0                                            # Creating a counter variable
+        warnings = ""                                                # Creating a warning variable
+
+        if EmailTextField.get() == "":                               # Checking if Email is empty
+            warnings="Email Textfield cannot be empty"               # Creating warning message
+        else:
+            check_counter += 1                                       # Adding 1 to the check_counter variable
+
+        if NameTextField.get() == "":                                # Checking if Name is empty
+            warnings="Name Textfield cannot be empty"                # Creating warning message
+        else:
+            check_counter += 1                                       # Adding 1 to the check_counter variable
+
+        if PasswordTextField.get() == "":                            # Checking if Password is empty
+            warnings="Password Textfield cannot be empty"            # Creating warning message
+        else:
+            check_counter += 1
+
+        if check_counter == 3:                                       # Creating inserting message
+            try:                                                     # Try catch function
+                connection = sqlite3.connect('Spotify.db')           # Connection to Database
+                cur        = connection.cursor()                     # connecting to database
+                cur.execute("INSERT INTO users (Email,Name,Password) "
+                            "VALUES (:Email, :Name, :Password)",
+      {
+                'Email'    : EmailTextField.get(),                    # Assigning entry value to db column
+                'Name'     : NameTextField.get(),                     # Assigning entry value to db column
+                'Password' : PasswordTextField.get()                  # Assigning entry value to db column
+                })
+                connection.commit()                                   # Executing Inserting query
+                tkinter.messagebox.showinfo("Success",            # Creating message box
+                                            "Account Created Successfully",
+                                            icon='warning')
+                loginLayout()                                          # Calling loginLayout function
+            except ValueError:                                         # Catching ValueError
+                tkinter.messagebox.showwarning("ERROR", "Contact your Administrator for help",
+                                               icon = "warning")       # Error message
+        else:
+            tkinter.messagebox.showerror("ERROR",
+                                         "ERROR !!!, No Data Saved!!! - Try Again",
+                                         icon = "warning")
+
+           
+
+
+
+
+
+
+
+
+
 
     whiteLogo = Image.open("images/spotify_white.png")               # Opening spotify logo
     resizedWhite = whiteLogo.resize((50, 50))                        # Resizing spotify logo
@@ -441,7 +565,87 @@ def signupLayout():
                        font=("CircularStd", 10, "bold"),             # Setting font
                        foreground="#ffffff",                         # Setting foreground color
                        bg="#000000")                                 # Setting background color
-    EmailLabel.place(x=signup_width // 7, y=signup_height // 2.5)      # Placing the label
+    EmailLabel.place(x=signup_width // 7, y=signup_height // 2.8)    # Placing the label
+
+    EmailTextField = Entry(signupPage,                               # Creating a text field
+                           relief="solid",                           # Setting relief
+                           font=("CircularStd", 10),                 # Setting font
+                           background="black",                       # Adding Background color
+                           foreground="gray",                        # Setting foreground color
+                           highlightthickness=1,                     # Setting highlight thickness
+                           highlightbackground="gray")               # Setting highlight background color
+    EmailTextField.insert(0, "name@domain.com")           # Inserting text
+    EmailTextField.place(x=signup_width // 7, y=signup_height // 2.6 , width=350, height= 50) # Placing the text field
+    EmailTextField.bind("<Button-1>", EmailEntry_Focus)              # Binding EmailEntry_Focus function
+    EmailTextField.bind("<Leave>",    EmailEntry_Leave)               # Binding EmailEntry_Leave function
+
+    NameLabel = Label(signupPage,                                    # Creating a label,
+                      text="Name",                                   # Setting text
+                      font=("CircularStd", 10, "bold"),              # Setting font
+                      foreground="#ffffff",                          # Setting foreground color
+                      bg="#000000")                                  # Setting background color
+    NameLabel.place(x=signup_width // 7, y=signup_height // 2.2)     # Placing Label
+
+    NameTextField = Entry(signupPage,                                # Creating a text field
+                          relief="solid",                            # Setting relief
+                          font=("CircularStd", 10),                  # Setting font
+                          background="black",                        # Adding Background color
+                          foreground="gray",                         # Adding Foreground Color
+                          highlightthickness=1,                      # Setting highlight
+                          highlightbackground="gray")                # Setting highlight background color
+    NameTextField.insert(0, "John Doe")                   # Inserting text
+    NameTextField.place(x=signup_width // 7, y=signup_height // 2.08, width=350, height= 50) # Placing the text field
+    NameTextField.bind("<Button-1>", NameEntry_Focus)                # Binding NameEntry_Focus function
+    NameTextField.bind("<Leave>",    NameEntry_Leave)                # Binding NameEntry_Leave function
+
+    PasswordLabel = Label(signupPage,                                # Creating a label,
+                          text="Password",                           # Setting text
+                          font=("CircularStd", 10, "bold"),          # Setting font
+                          foreground="#ffffff",                      # Setting foreground color
+                          bg="#000000")                              # Setting background color
+    PasswordLabel.place(x=signup_width // 7, y=signup_height // 1.8) # Placing Label
+
+
+    PasswordTextField = Entry(signupPage,                            # Creating a text field
+                              relief="solid",                        # Setting relief
+                              font=("CircularStd", 10),              # Setting font
+                              background="black",                    # Adding Background color
+                              foreground="gray",                     # Adding Foreground Color
+                              highlightthickness=1,                  # Setting highlight
+                              highlightbackground="gray")            # Setting highlight background color
+    PasswordTextField.insert(0, "Password")                 # Inserting text
+    PasswordTextField.place(x=signup_width // 7, y=signup_height // 1.7, width=350, height= 50) # Placing the text field3
+    PasswordTextField.bind("<Button-1>", PasswordEntry_Focus)        # Binding PasswordEntry_Focus function
+    PasswordTextField.bind("<Leave>",    PasswordEntry_Leave)        # Binding PasswordEntry_Leave function
+
+    HideEye = Image.open("images/invisible_eye.png")                     # Opening eye image
+    ResizedEye = HideEye.resize((25, 25))                            # Resizing the eye images
+    NewHideEye = ImageTk.PhotoImage(ResizedEye)                      # Resizing the eye images
+
+    ShowEye = Image.open("images/visible_eye.png")                   # Opening eye image
+    ResizedShowEye = ShowEye.resize((25, 25))                        # Resizing the eye images
+    NewShowEye = ImageTk.PhotoImage(ResizedShowEye)                  # Resizing the eye images
+
+    EyeImage = Label(signupPage,                                     # Creating a label
+                     image=NewShowEye,                               # Setting image
+                     bg="#000000",                                   # Setting background color
+                     cursor="hand2")                                 # Setting cursor
+    EyeImage.image = NewShowEye                                      # Prevent garbage collection
+    EyeImage.bind("<Button-1>", lambda e: show_hide_Password())      # Calling show_hide_Password function
+
+    SignupButton = Button(signupPage,                                # Creating a button
+                          text="Sign up",                            # Setting text
+                          command="",                                # Setting command
+                          font=("CircularStd", 10, "bold"),          # Setting font
+                          width=43,                                  # Setting width
+                          height=3,                                  # Setting height
+                          border=0,                                  # Setting border
+                          cursor="hand2",                            # Setting cursor
+                          background="#1ED760",                      # Setting background color
+                          foreground="white")                        # Setting foreground color
+    SignupButton.place(x=signup_width // 7, y=signup_height // 1.4) # Placing the button
+
+
 
 Spotify()                                                            # Calling Spotify function
 mainloop()                                                           # Running mainloop
